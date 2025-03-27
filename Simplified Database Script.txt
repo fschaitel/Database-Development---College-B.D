@@ -1,0 +1,86 @@
+CREATE DATABASE IF NOT EXISTS faculdade_simplificada;
+USE faculdade_simplificada;
+
+
+
+CREATE TABLE aluno (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+
+INSERT INTO aluno (nome) VALUES 
+    ('João Silva'),
+    ('Maria Oliveira'),
+    ('Pedro Santos'),
+    ('Ana Costa');
+
+
+
+CREATE TABLE disciplina (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+
+INSERT INTO disciplina (nome) VALUES 
+    ('Matemática'),
+    ('Física'),
+    ('Química'),
+    ('História');
+
+
+
+
+CREATE TABLE aluno_disciplinas_realizadas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_aluno INT NOT NULL,
+    id_disciplina INT NOT NULL,
+    concluiu BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplina(id)
+);
+
+
+INSERT INTO aluno_disciplinas_realizadas (id_aluno, id_disciplina, concluiu) VALUES 
+    (1, 1, TRUE),
+    (1, 2, TRUE),
+    (2, 3, FALSE),
+    (3, 4, TRUE),
+    (4, 1, TRUE);
+
+
+CREATE TABLE notas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_aluno INT NOT NULL,
+    id_disciplina INT NOT NULL,
+    nota DECIMAL(5, 2) NOT NULL,
+    FOREIGN KEY (id_aluno) REFERENCES aluno(id),
+    FOREIGN KEY (id_disciplina) REFERENCES disciplina(id)
+);
+
+
+INSERT INTO notas (id_aluno, id_disciplina, nota) VALUES 
+    (1, 1, 7.5),
+    (1, 2, 8.0),
+    (2, 3, 6.5),
+    (3, 4, 9.0);
+
+
+
+SELECT 
+    a.nome AS aluno,
+    d.nome AS disciplina,
+    COALESCE(AVG(n.nota), 'SEM NOTA') AS media
+FROM 
+    aluno a
+LEFT JOIN 
+    aluno_disciplinas_realizadas adr ON a.id = adr.id_aluno
+LEFT JOIN 
+    disciplina d ON adr.id_disciplina = d.id
+LEFT JOIN 
+    notas n ON a.id = n.id_aluno AND d.id = n.id_disciplina
+GROUP BY 
+    a.id, d.id
+ORDER BY 
+    a.nome, d.nome;
